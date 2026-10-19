@@ -1,87 +1,85 @@
-HW2 - Password Strength Checker
-================================
+HW2 - 密碼強度檢查器
+====================
 
-Files
------
-password_checker.py       Main program (standard library only, Python 3.8+)
-test_password_checker.py  unittest suite
-README.txt                This file
+檔案說明
+--------
+password_checker.py       主程式（僅使用標準函式庫，Python 3.8+）
+test_password_checker.py  unittest 測試套件
+README.txt                本說明文件
 
-How to run
-----------
-  python password_checker.py          (start the interactive checker)
-  python -m unittest -v               (run all tests)
+執行方式
+--------
+  python password_checker.py          （啟動互動式檢查器）
+  python -m unittest -v               （執行所有測試）
 
-Rules (a password must satisfy ALL of them)
--------------------------------------------
-1. Length >= 8
-2. At least one uppercase letter (A-Z)
-3. At least one lowercase letter (a-z)
-4. At least one digit (0-9)
-5. At least one special character from this list only: ! @ # $ % ^ & *
-6. No character repeated 3 or more times in a row
-   ("aa" is fine, "aaa" is not; "aAa" is fine because case differs)
+密碼規則（必須全部符合）
+------------------------
+1. 長度至少 8 個字元
+2. 至少一個大寫字母（A-Z）
+3. 至少一個小寫字母（a-z）
+4. 至少一個數字（0-9）
+5. 至少一個特殊字元，限以下清單：! @ # $ % ^ & *
+6. 不可有連續重複 3 次以上的相同字元
+   （「aa」可以，「aaa」不行；「aAa」可以，因為大小寫不同）
 
-Interaction
------------
-- The program prompts in a loop.
-- If the password fails, ALL failed rules are listed, then it prompts again.
-- If everything passes it prints "Password meets strength requirements." and exits.
-- "q" or "quit" (any case, surrounding spaces ignored) exits immediately.
+操作說明
+--------
+- 程式會持續提示輸入，直到成功或離開為止。
+- 若密碼不合格，會列出所有未通過的規則，然後再次提示。
+- 全部通過後顯示「密碼符合強度要求。」並結束。
+- 輸入「quit」（不分大小寫，忽略前後空白）可立即離開。
 
-Design decisions
-----------------
-- The quit command is checked BEFORE validation, so "q" is never treated as a password.
-- An empty or whitespace-only input gets its own message
-  ("Password cannot be empty.") instead of a list of every failed rule.
-- Symbols outside the list (e.g. - _ and space) are allowed in a password
-  but do NOT count as special characters.
-- Ctrl+C (KeyboardInterrupt) and Ctrl+D (EOFError) end the program with
-  "Goodbye." instead of a traceback.
-- input() is used (not getpass) so the typed password is visible in screenshots.
-- Validation uses the raw input (not stripped), so leading/trailing spaces
-  count as characters. Only the quit check and the empty check use strip().
-- Letters and digits are matched by ASCII range, so characters such as the
-  superscript "2" or full-width digits are not accepted as digits.
-- Logic and I/O are separated: check_password(str) -> list of failure
-  messages (empty list = strong); main() only handles the prompt loop.
-- Rules live in one table (RULES) of (message, predicate); adding a rule
-  means adding one line.
+設計說明
+--------
+- 離開指令優先於驗證檢查，因此「quit」不會被當作密碼處理。
+- 空白或純空格輸入會顯示專屬訊息（「密碼不可為空白。」），
+  而非列出所有失敗規則。
+- 清單以外的符號（例如 - _ 及空格）可出現在密碼中，
+  但不算作特殊字元。
+- Ctrl+C（KeyboardInterrupt）及 Ctrl+D（EOFError）會顯示
+  「再見。」後結束，不會產生錯誤訊息。
+- 使用 input()（而非 getpass），輸入時密碼可見。
+- 驗證使用原始輸入（未去除空白），前後空格仍計入字元數；
+  只有離開指令與空值檢查才使用 strip()。
+- 字母與數字以 ASCII 範圍比對，全形數字或上標字元（如「²」）
+  不被視為有效數字。
+- 邏輯與 I/O 分離：check_password(str) 回傳失敗訊息列表
+  （空列表 = 強度足夠）；main() 只負責提示迴圈。
+- 規則集中存放於 RULES 表格（訊息, 判斷式）；新增規則只需加一行。
 
-Test cases (input -> expected output)
--------------------------------------
-Input            Expected output
+測試案例（輸入 -> 預期結果）
+-----------------------------
+輸入             預期結果
 ---------------  ---------------------------------------------------------
-Abcdef1!         Password meets strength requirements.   (exactly 8 chars)
-Ab1!xyz          Fails: length (7 chars)
-abcdef1!         Fails: uppercase
-ABCDEF1!         Fails: lowercase
-Abcdefg!         Fails: digit
-Abcdefg1         Fails: special character
-Abcdef1-         Fails: special character ("-" is not in the list)
-Aabb1cd!         Meets requirements (two repeats are allowed)
-Abbb1cd!         Fails: repeated 3+ times in a row
-aAab1cD!         Meets requirements (a, A, a differ by case)
-abc              Fails: length, uppercase, digit, special character
-aaa              Fails: length, uppercase, digit, special, repeated
-(empty line)     Password cannot be empty.
-(spaces only)    Password cannot be empty.
-q / Q            Goodbye.  (exit)
-quit / QUIT      Goodbye.  (exit)
-  quit           Goodbye.  (surrounding spaces ignored)
-quit now / qq    Treated as a password and validated
-Ctrl+C / Ctrl+D  Goodbye.  (exit, no traceback)
+Abcdef1!         密碼符合強度要求。（剛好 8 個字元）
+Ab1!xyz          不合格：長度（7 個字元）
+abcdef1!         不合格：大寫字母
+ABCDEF1!         不合格：小寫字母
+Abcdefg!         不合格：數字
+Abcdefg1         不合格：特殊字元
+Abcdef1-         不合格：特殊字元（「-」不在清單內）
+Aabb1cd!         符合要求（連續重複 2 次可以）
+Abbb1cd!         不合格：連續重複 3 次以上
+aAab1cD!         符合要求（a、A、a 大小寫不同）
+abc              不合格：長度、大寫字母、數字、特殊字元
+aaa              不合格：長度、大寫字母、數字、特殊字元、連續重複
+（空白行）       密碼不可為空白。
+（純空格）       密碼不可為空白。
+quit / QUIT      再見。（離開）
+  quit           再見。（忽略前後空白）
+quit now / qq    視為密碼並進行驗證
+Ctrl+C / Ctrl+D  再見。（離開，不顯示錯誤訊息）
 
-Sample console session
-----------------------
-Enter a password (q or quit to exit): abc
-Password does not meet the following requirements:
-  - At least 8 characters long
-  - At least one uppercase letter (A-Z)
-  - At least one digit (0-9)
-  - At least one special character (!@#$%^&*)
-Enter a password (q or quit to exit): Abbb1cd!
-Password does not meet the following requirements:
-  - No character repeated 3 or more times in a row
-Enter a password (q or quit to exit): Aabb1cd!
-Password meets strength requirements.
+範例操作流程
+------------
+請輸入密碼（輸入 quit 離開）：abc
+密碼未符合以下要求：
+  - 至少 8 個字元
+  - 至少一個大寫字母（A-Z）
+  - 至少一個數字（0-9）
+  - 至少一個特殊字元（!@#$%^&*）
+請輸入密碼（輸入 quit 離開）：Abbb1cd!
+密碼未符合以下要求：
+  - 不可有連續重複 3 次以上的相同字元
+請輸入密碼（輸入 quit 離開）：Aabb1cd!
+密碼符合強度要求。
